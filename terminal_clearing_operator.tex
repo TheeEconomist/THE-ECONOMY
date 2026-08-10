@@ -1,0 +1,77 @@
+Mathematical Specification of the Terminal Clearing Operator
+
+\[
+P_t^{(i)} \leftarrow \mathcal{A}\bigl(P_{t^-}^{(i)},\, D_t,\, \Omega_i\bigr)
+\]
+
+1. Definitions
+
+\( P_{t^-}^{(i)} \in \mathbb{R}_+ \):  
+  Pre-clearing price (or market value) of asset \(i\) in the old numeraire, observed at the instant immediately before the simultaneous-liquidation / PIK-saturation trigger.
+
+\( D_t \in \mathbb{R}_+ \):  
+  World deficit stock at time \(t\). Defined as the aggregate excess of nominal claims over realizable value across the entire visible claim structure:
+  \[
+  D_t = \sum_j C_j(t) - V_{\text{real}}(t)
+  \]
+  where \(C_j(t)\) are all outstanding nominal claims and \(V_{\text{real}}(t)\) is the contemporaneous valuation of the real-economy substrate. Once the trigger fires, \(D_t\) becomes the sole numeraire.
+
+\( \Omega_i \in [0,1] \):  
+  Residual claim priority / collateral quality of asset \(i\).  
+  \(\Omega_i = 1\) corresponds to the highest-priority, best-collateralized residual claim;  
+  \(\Omega_i = 0\) corresponds to pure residual / unsecured / fully subordinated claims.
+
+2. Functional Form of the Clearing Algorithm \(\mathcal{A}\)
+
+The operator \(\mathcal{A}\) performs a simultaneous, deficit-relative normalization of every asset. A canonical realization is the priority-weighted deficit clearing rule:
+
+\[
+\mathcal{A}\bigl(P_{t^-}^{(i)},\, D_t,\, \Omega_i\bigr)
+=
+\left(
+\frac{P_{t^-}^{(i)}}{\sum_j P_{t^-}^{(j)} \cdot \Omega_j}
+\right)
+\cdot
+\Omega_i
+\cdot
+D_t
+\]
+
+Interpretation
+
+The term \(\dfrac{P_{t^-}^{(i)}}{\sum_j P_{t^-}^{(j)} \cdot \Omega_j}\) computes the relative weight of asset \(i\) in the pre-clearing universe, adjusted by priority.
+Multiplication by \(\Omega_i\) further scales the claim by its residual seniority / collateral quality.
+Multiplication by \(D_t\) re-denominates the result in units of the world deficit stock.
+
+Thus every price is expressed as a pure fraction of the residual deficit, modulated by seniority.
+
+3. Alternative Strict Seniority Form (Waterfall)
+
+If absolute priority is enforced, the algorithm becomes a sequential waterfall:
+
+\[
+\begin{align*}
+R_0 &= D_t \\
+R_{k} &= R_{k-1} - \sum_{i \in \mathcal{S}k} P{t^-}^{(i)} \\
+P_t^{(i)} &= 
+\begin{cases}
+P_{t^-}^{(i)} & \text{if } i \in \mathcal{S}k \text{ and } R{k-1} \ge \sum_{i \in \mathcal{S}k} P{t^-}^{(i)} \\
+\dfrac{R_{k-1}}{\sum_{i \in \mathcal{S}k} P{t^-}^{(i)}} \cdot P_{t^-}^{(i)} & \text{if partial recovery} \\
+0 & \text{if } R_{k-1} = 0
+\end{cases}
+\end{align*}
+\]
+
+where \(\mathcal{S}_k\) is the set of assets of seniority class \(k\), ordered from highest to lowest \(\Omega\).
+
+4. Compact Operator Statement
+
+\[
+P_t^{(i)} 
+= 
+\mathcal{A}\bigl(P_{t^-}^{(i)},\, D_t,\, \Omega_i\bigr)
+=
+\frac{P_{t^-}^{(i)} \cdot \Omega_i}{\sum_j P_{t^-}^{(j)} \cdot \Omega_j} \cdot D_t
+\]
+
+This is the fully specified mathematical form of the terminal clearing algorithm. All assets are re-priced simultaneously in units of the world deficit stock \(D_t\), with relative recovery determined exclusively by residual claim priority \(\Omega_i\).
